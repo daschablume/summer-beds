@@ -1,22 +1,20 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
-
 // ========================================================
 // ⚠️ FIREBASE CONFIGURATION
 // ========================================================
-const firebaseConfig = {};
+const firebaseConfig = {
 
-// Check if Firebase is actually configured by checking if there's an apiKey
+};
+
+// Check if Firebase is actually configured
 const isFirebaseConfigured = !!firebaseConfig.apiKey;
 
 let database = null;
 if (isFirebaseConfigured) {
-  const app = initializeApp(firebaseConfig);
-  database = getDatabase(app);
+  firebase.initializeApp(firebaseConfig);
+  database = firebase.database();
 } else {
   console.warn("⚠️ Firebase is not configured yet! Falling back to LocalStorage.");
 }
-
 
 // Initial Data Structure (Used if database is empty)
 const WEEKS_DATA = [
@@ -58,28 +56,33 @@ const WEEKS_DATA = [
   }
 ];
 
-let appData = [];
+let appData = JSON.parse(JSON.stringify(WEEKS_DATA));
 
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
+  renderApp(); // Render immediately so the calendar is never blank!
   loadData();
 });
 
 // Load Data
 function loadData() {
   if (isFirebaseConfigured) {
-    // 1. Firebase Method (Real-time syncing)
-    const bedsRef = ref(database, 'summer_beds_data');
-    onValue(bedsRef, (snapshot) => {
+    // 1. Firebase Method (Real-time syncing using compat libraries)
+    const bedsRef = database.ref('summer_beds_data');
+    bedsRef.on('value', (snapshot) => {
       const data = snapshot.val();
       if (data) {
         appData = data;
       } else {
-        // If database is empty, seed it with initial structure
         appData = JSON.parse(JSON.stringify(WEEKS_DATA));
-        set(bedsRef, appData);
+        bedsRef.set(appData).catch(err => console.warn("Could not seed data:", err));
       }
       renderApp();
+    }, (error) => {
+      console.error("Firebase Read Error! Make sure your Security Rules are set to true. Error:", error);
+      appData = JSON.parse(JSON.stringify(WEEKS_DATA));
+      renderApp(); // Render anyway so UI doesn't disappear
+      showToast("Could not connect to database. Check security rules.", true);
     });
   } else {
     // 2. LocalStorage Method (Fallback)
@@ -100,12 +103,10 @@ function loadData() {
 // Save Data (Update)
 function saveData() {
   if (isFirebaseConfigured) {
-    // 1. Firebase Method
-    const bedsRef = ref(database, 'summer_beds_data');
-    set(bedsRef, appData)
+    const bedsRef = database.ref('summer_beds_data');
+    bedsRef.set(appData)
       .catch((error) => console.error("Firebase update failed:", error));
   } else {
-    // 2. LocalStorage Method (Fallback)
     localStorage.setItem('summerBedsData', JSON.stringify(appData));
   }
 }
@@ -117,6 +118,11 @@ function saveData() {
 function renderApp() {
   const container = document.getElementById('calendar-container');
   container.innerHTML = '';
+
+  // Wait! If appData isn't an array for some reason (maybe malformed Firebase snapshot), safeguard it:
+  if (!Array.isArray(appData)) {
+    appData = JSON.parse(JSON.stringify(WEEKS_DATA));
+  }
 
   appData.forEach(week => {
     const weekEl = document.createElement('section');
@@ -148,7 +154,10 @@ function renderApp() {
       const bedsGrid = document.createElement('div');
       bedsGrid.className = 'beds-grid';
 
-      day.beds.forEach((bookerName, idx) => {
+      if (!day.beds) day.beds = new Array(8).fill(null); // Safety check in case Firebase drops empty arrays
+
+      for (let idx = 0; idx < 8; idx++) {
+        const bookerName = day.beds[idx] || null;
         const bedSlot = document.createElement('div');
         bedSlot.dataset.dayId = day.id;
         bedSlot.dataset.slotIdx = idx;
@@ -171,7 +180,7 @@ function renderApp() {
         }
 
         bedsGrid.appendChild(bedSlot);
-      });
+      }
 
       dayCard.appendChild(dayHeader);
       dayCard.appendChild(bedsGrid);
@@ -183,7 +192,6 @@ function renderApp() {
     container.appendChild(weekEl);
   });
 
-  // Re-initialize feather icons for newly added elements
   if (window.feather) {
     feather.replace();
   }
@@ -279,7 +287,6 @@ function updateBedStatus(dayId, slotIdx, newStatus) {
         day.beds[slotIdx] = newStatus;
         saveData(); // Syncs to Firebase (or LocalStorage)
 
-        // Only render immediately if LocalStorage. Firebase uses a listener.
         if (!isFirebaseConfigured) renderApp();
 
         return true;
