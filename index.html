@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summer Beds Booking</title>
+    <meta name="description" content="Book your summer bed for Week 26, 27, and 28!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i data-feather="sun" class="sun-icon"></i>
+                    <h1>Summer Beds</h1>
+                </div>
+                <p class="subtitle">Book your stay for the best weeks of the summer.</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="calendar-container" id="calendar-container">
+            <!-- Weeks will be rendered here via JS -->
+        </main>
+
+        <!-- Booking Modal -->
+        <div class="modal-overlay" id="booking-modal">
+            <div class="modal-content">
+                <button class="close-modal" id="close-modal" aria-label="Close modal">
+                    <i data-feather="x"></i>
+                </button>
+                <div class="modal-header">
+                    <i data-feather="calendar" class="modal-icon"></i>
+                    <h2 id="modal-title">Book a Bed</h2>
+                    <p id="modal-date">Date goes here</p>
+                </div>
+                <form id="booking-form">
+                    <div class="input-group">
+                        <label for="booker-name">Your Name</label>
+                        <input type="text" id="booker-name" placeholder="E.g., Alex Johnson" required autocomplete="off">
+                    </div>
+                    <input type="hidden" id="booking-day-id">
+                    <input type="hidden" id="booking-slot-idx">
+                    <button type="submit" class="btn-primary">Confirm Booking</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cancellation Modal -->
+        <div class="modal-overlay" id="cancel-modal">
+            <div class="modal-content">
+                <button class="close-modal" id="close-cancel-modal" aria-label="Close modal">
+                    <i data-feather="x"></i>
+                </button>
+                <div class="modal-header header-danger">
+                    <i data-feather="alert-circle" class="modal-icon"></i>
+                    <h2>Cancel Booking</h2>
+                    <p>Are you sure you want to remove <strong id="cancel-name"></strong> from this bed on <strong id="cancel-date-text"></strong>?</p>
+                </div>
+                <form id="cancel-form">
+                    <input type="hidden" id="cancel-day-id">
+                    <input type="hidden" id="cancel-slot-idx">
+                    <button type="submit" class="btn-danger">Yes, Remove Booking</button>
+                    <button type="button" class="btn-secondary" id="btn-keep-booking">No, Keep It</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container"></div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
