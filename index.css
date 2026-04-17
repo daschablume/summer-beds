@@ -505,6 +505,94 @@ button {
   transform: translateX(0);
 }
 
+/* Multi-Select Toolbar */
+.multi-select-toolbar {
+  max-width: 1200px;
+  margin: 1.5rem auto -1rem;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.toolbar-content {
+  background: white;
+  border-radius: var(--radius-full);
+  padding: 0.5rem 1rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #E5E7EB;
+  transition: var(--transition-normal);
+}
+
+.toolbar-content.hidden {
+  display: none;
+}
+
+.btn-action {
+  background: transparent;
+  border: none;
+  color: var(--color-text-main);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.btn-action:hover {
+  color: var(--color-primary);
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  padding: 0 0.5rem;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toolbar-actions button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+}
+
+#btn-book-multi:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Selected Bed State */
+.bed-selected {
+  background: #FFFBEB;
+  border: 2px solid var(--color-accent);
+  color: var(--color-text-main);
+  font-weight: 600;
+  transform: scale(1.02);
+  box-shadow: var(--shadow-sm);
+}
+
+.bed-selected::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+}
+
+
 @media (max-width: 768px) {
   .calendar-container {
     padding: 0 1rem;

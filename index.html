@@ -29,6 +29,26 @@
             </div>
         </header>
 
+        <!-- Multi-Select Toolbar -->
+        <div id="multi-select-toolbar" class="multi-select-toolbar">
+            <div class="toolbar-content" id="toolbar-default">
+                <button id="btn-enable-multi" class="btn-action">
+                    <i data-feather="check-square"></i>
+                    <span>Select Multiple Beds</span>
+                </button>
+            </div>
+            <div class="toolbar-content hidden" id="toolbar-active">
+                <div class="selection-info">
+                    <i data-feather="layers" class="toolbar-icon"></i>
+                    <span id="multi-select-count">0 beds selected</span>
+                </div>
+                <div class="toolbar-actions">
+                    <button id="btn-cancel-multi" class="btn-secondary">Cancel</button>
+                    <button id="btn-book-multi" class="btn-primary" disabled>Book Selected</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <main class="calendar-container" id="calendar-container">
             <!-- Weeks will be rendered here via JS -->

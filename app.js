@@ -53,6 +53,8 @@ const WEEKS_DATA = [
 
 let appData = JSON.parse(JSON.stringify(WEEKS_DATA));
 let currentWeekIndex = 0;
+let isMultiSelectMode = false;
+let selectedBeds = [];
 
 const bookingModal = document.getElementById('booking-modal');
 const cancelModal = document.getElementById('cancel-modal');
@@ -203,8 +205,9 @@ function renderApp() {
         `;
         bedSlot.addEventListener('click', handleCancelClick);
       } else {
-        bedSlot.className = 'bed-slot bed-available';
-        bedSlot.innerHTML = 'Available';
+        const isSelected = isMultiSelectMode && selectedBeds.some(b => b.dayId === day.id && b.slotIdx === idx);
+        bedSlot.className = isSelected ? 'bed-slot bed-selected' : 'bed-slot bed-available';
+        bedSlot.innerHTML = isSelected ? 'Selected' : 'Available';
         bedSlot.addEventListener('click', handleBookClick);
       }
 
@@ -229,12 +232,53 @@ function renderApp() {
 
 function handleBookClick(e) {
   const slot = e.currentTarget;
-  document.getElementById('modal-date').textContent = slot.dataset.dateText;
-  document.getElementById('booking-day-id').value = slot.dataset.dayId;
-  document.getElementById('booking-slot-idx').value = slot.dataset.slotIdx;
-  bookerNameInput.value = '';
-  bookingModal.classList.add('active');
-  setTimeout(() => bookerNameInput.focus(), 100);
+  if (!isMultiSelectMode) {
+    document.getElementById('modal-title').textContent = "Book a Bed";
+    document.getElementById('modal-date').textContent = slot.dataset.dateText;
+    document.getElementById('booking-day-id').value = slot.dataset.dayId;
+    document.getElementById('booking-slot-idx').value = slot.dataset.slotIdx;
+    bookerNameInput.value = '';
+    bookingModal.classList.add('active');
+    setTimeout(() => bookerNameInput.focus(), 100);
+  } else {
+    const dayId = slot.dataset.dayId;
+    const slotIdx = parseInt(slot.dataset.slotIdx, 10);
+    const dateText = slot.dataset.dateText;
+
+    const existingIndex = selectedBeds.findIndex(b => b.dayId === dayId && b.slotIdx === slotIdx);
+    
+    if (existingIndex >= 0) {
+      selectedBeds.splice(existingIndex, 1);
+    } else {
+      const sameDayIndex = selectedBeds.findIndex(b => b.dayId === dayId);
+      if (sameDayIndex >= 0) {
+        selectedBeds[sameDayIndex] = { dayId, slotIdx, dateText };
+      } else {
+        selectedBeds.push({ dayId, slotIdx, dateText });
+      }
+    }
+    updateMultiSelectUI();
+    renderApp();
+  }
+}
+
+function updateMultiSelectUI() {
+  const defaultToolbar = document.getElementById('toolbar-default');
+  const activeToolbar = document.getElementById('toolbar-active');
+  const countSpan = document.getElementById('multi-select-count');
+  const bookBtn = document.getElementById('btn-book-multi');
+
+  if (!defaultToolbar || !activeToolbar) return;
+
+  if (isMultiSelectMode) {
+    defaultToolbar.classList.add('hidden');
+    activeToolbar.classList.remove('hidden');
+    countSpan.textContent = `${selectedBeds.length} bed${selectedBeds.length === 1 ? '' : 's'} selected`;
+    bookBtn.disabled = selectedBeds.length === 0;
+  } else {
+    defaultToolbar.classList.remove('hidden');
+    activeToolbar.classList.add('hidden');
+  }
 }
 
 function handleCancelClick(e) {
@@ -255,6 +299,29 @@ function setupEventListeners() {
   document.getElementById('close-cancel-modal').addEventListener('click', () => closeModal(cancelModal));
   document.getElementById('btn-keep-booking').addEventListener('click', () => closeModal(cancelModal));
 
+  document.getElementById('btn-enable-multi').addEventListener('click', () => {
+    isMultiSelectMode = true;
+    selectedBeds = [];
+    updateMultiSelectUI();
+    renderApp();
+  });
+  
+  document.getElementById('btn-cancel-multi').addEventListener('click', () => {
+    isMultiSelectMode = false;
+    selectedBeds = [];
+    updateMultiSelectUI();
+    renderApp();
+  });
+
+  document.getElementById('btn-book-multi').addEventListener('click', () => {
+    if (selectedBeds.length === 0) return;
+    document.getElementById('modal-title').textContent = `Book ${selectedBeds.length} Beds`;
+    document.getElementById('modal-date').textContent = "Multiple Dates Selected";
+    bookerNameInput.value = '';
+    bookingModal.classList.add('active');
+    setTimeout(() => bookerNameInput.focus(), 100);
+  });
+
   window.addEventListener('click', (e) => {
     if (e.target === bookingModal) closeModal(bookingModal);
     if (e.target === cancelModal) closeModal(cancelModal);
@@ -265,14 +332,34 @@ function setupEventListeners() {
     const name = bookerNameInput.value.trim();
     if (!name) return;
 
-    const dayId = document.getElementById('booking-day-id').value;
-    const slotIdx = parseInt(document.getElementById('booking-slot-idx').value, 10);
-
-    if (updateBedStatus(dayId, slotIdx, name)) {
-      closeModal(bookingModal);
-      showToast(`Bed successfully booked for ${name}!`);
+    if (isMultiSelectMode) {
+      let successCount = 0;
+      for (const bed of selectedBeds) {
+        if (updateBedStatus(bed.dayId, bed.slotIdx, name, true)) {
+          successCount++;
+        }
+      }
+      if (successCount > 0) {
+        saveData();
+        if (!isFirebaseConfigured) renderApp();
+        showToast(`Successfully booked ${successCount} beds!`);
+        isMultiSelectMode = false;
+        selectedBeds = [];
+        updateMultiSelectUI();
+        closeModal(bookingModal);
+      } else {
+        showToast(`Failed to book selected beds.`, true);
+      }
     } else {
-      showToast(`Failed to book. Slot might be taken.`, true);
+      const dayId = document.getElementById('booking-day-id').value;
+      const slotIdx = parseInt(document.getElementById('booking-slot-idx').value, 10);
+
+      if (updateBedStatus(dayId, slotIdx, name)) {
+        closeModal(bookingModal);
+        showToast(`Bed successfully booked for ${name}!`);
+      } else {
+        showToast(`Failed to book. Slot might be taken.`, true);
+      }
     }
   });
 
@@ -294,16 +381,19 @@ function setupEventListeners() {
 // UTILITIES
 // ========================================================
 
-function updateBedStatus(dayId, slotIdx, newStatus) {
+function updateBedStatus(dayId, slotIdx, newStatus, skipSave = false) {
   for (let w = 0; w < appData.length; w++) {
     const week = appData[w];
     for (let d = 0; d < week.days.length; d++) {
       const day = week.days[d];
       if (day.id === dayId) {
-        if (newStatus !== null && day.beds[slotIdx] !== null) return false;
+        if (!day.beds) day.beds = new Array(8).fill(null);
+        if (newStatus !== null && day.beds[slotIdx]) return false;
         day.beds[slotIdx] = newStatus;
-        saveData();
-        if (!isFirebaseConfigured) renderApp();
+        if (!skipSave) {
+          saveData();
+          if (!isFirebaseConfigured) renderApp();
+        }
         return true;
       }
     }
