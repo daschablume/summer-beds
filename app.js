@@ -236,6 +236,17 @@ function handleMultiSelectToggle(slot, isBooked) {
   const slotIdx = parseInt(slot.dataset.slotIdx, 10);
   const dateText = slot.dataset.dateText;
 
+  // Enforce selecting only one type (booked vs unbooked) at a time
+  if (selectedBeds.length > 0) {
+    const existingTypeIsBooked = selectedBeds[0].isBooked;
+    // Allow deselection by skipping error if they are clicking a bed they already selected
+    const existingIndex = selectedBeds.findIndex(b => b.dayId === dayId && b.slotIdx === slotIdx);
+    if (existingTypeIsBooked !== isBooked && existingIndex === -1) {
+      showToast("You can only select either all available or all booked beds.", true);
+      return;
+    }
+  }
+
   const existingIndex = selectedBeds.findIndex(b => b.dayId === dayId && b.slotIdx === slotIdx);
   
   if (existingIndex >= 0) {
