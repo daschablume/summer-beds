@@ -143,22 +143,66 @@ h1, h2, h3, h4, h5, h6 {
 
 .week-header {
   display: flex;
-  align-items: baseline;
-  gap: 1rem;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #E5E7EB;
 }
 
+.week-title-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.nav-btn {
+  background: white;
+  border: 1px solid #D1D5DB;
+  border-radius: var(--radius-full);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-main);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.nav-btn:hover {
+  background: #F3F4F6;
+  border-color: #9CA3AF;
+}
+
+.nav-btn .feather {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-btn-placeholder {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
 .week-title {
   font-size: 1.75rem;
   color: var(--color-primary);
+  margin: 0;
 }
 
 .week-dates {
   color: var(--color-text-muted);
   font-size: 1rem;
   font-weight: 500;
+  margin: 0;
 }
 
 /* Days Grid */
