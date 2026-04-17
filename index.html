@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summer Beds Booking</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
     <meta name="description" content="Book your summer bed for Week 26, 27, and 28!">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +15,7 @@
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
 </head>
+
 <body>
     <div id="app">
         <!-- Header -->
@@ -45,7 +48,8 @@
                 <form id="booking-form">
                     <div class="input-group">
                         <label for="booker-name">Your Name</label>
-                        <input type="text" id="booker-name" placeholder="E.g., Alex Johnson" required autocomplete="off">
+                        <input type="text" id="booker-name" placeholder="E.g., Alex Johnson" required
+                            autocomplete="off">
                     </div>
                     <input type="hidden" id="booking-day-id">
                     <input type="hidden" id="booking-slot-idx">
@@ -63,7 +67,8 @@
                 <div class="modal-header header-danger">
                     <i data-feather="alert-circle" class="modal-icon"></i>
                     <h2>Cancel Booking</h2>
-                    <p>Are you sure you want to remove <strong id="cancel-name"></strong> from this bed on <strong id="cancel-date-text"></strong>?</p>
+                    <p>Are you sure you want to remove <strong id="cancel-name"></strong> from this bed on <strong
+                            id="cancel-date-text"></strong>?</p>
                 </div>
                 <form id="cancel-form">
                     <input type="hidden" id="cancel-day-id">
@@ -81,9 +86,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
 
-    <script src="app.js"></script>
+    <script src="app.js" type="module"></script>
     <script>
         feather.replace();
     </script>
 </body>
+
 </html>
