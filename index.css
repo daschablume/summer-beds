@@ -526,8 +526,8 @@ button {
   transition: var(--transition-normal);
 }
 
-.toolbar-content.hidden {
-  display: none;
+.toolbar-content.hidden, .hidden {
+  display: none !important;
 }
 
 .btn-action {

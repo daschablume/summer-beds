@@ -195,7 +195,8 @@ function renderApp() {
       bedSlot.dataset.dateText = `${day.name}, ${day.date}`;
 
       if (bookerName) {
-        bedSlot.className = 'bed-slot bed-booked';
+        const isSelected = isMultiSelectMode && selectedBeds.some(b => b.dayId === day.id && b.slotIdx === idx);
+        bedSlot.className = isSelected ? 'bed-slot bed-booked bed-selected' : 'bed-slot bed-booked';
         bedSlot.dataset.booker = bookerName;
         bedSlot.innerHTML = `
           <div class="bed-content">
@@ -230,6 +231,27 @@ function renderApp() {
 // EVENT HANDLERS
 // ========================================================
 
+function handleMultiSelectToggle(slot, isBooked) {
+  const dayId = slot.dataset.dayId;
+  const slotIdx = parseInt(slot.dataset.slotIdx, 10);
+  const dateText = slot.dataset.dateText;
+
+  const existingIndex = selectedBeds.findIndex(b => b.dayId === dayId && b.slotIdx === slotIdx);
+  
+  if (existingIndex >= 0) {
+    selectedBeds.splice(existingIndex, 1);
+  } else {
+    const sameDayIndex = selectedBeds.findIndex(b => b.dayId === dayId);
+    if (sameDayIndex >= 0) {
+      selectedBeds[sameDayIndex] = { dayId, slotIdx, dateText, isBooked };
+    } else {
+      selectedBeds.push({ dayId, slotIdx, dateText, isBooked });
+    }
+  }
+  updateMultiSelectUI();
+  renderApp();
+}
+
 function handleBookClick(e) {
   const slot = e.currentTarget;
   if (!isMultiSelectMode) {
@@ -241,24 +263,7 @@ function handleBookClick(e) {
     bookingModal.classList.add('active');
     setTimeout(() => bookerNameInput.focus(), 100);
   } else {
-    const dayId = slot.dataset.dayId;
-    const slotIdx = parseInt(slot.dataset.slotIdx, 10);
-    const dateText = slot.dataset.dateText;
-
-    const existingIndex = selectedBeds.findIndex(b => b.dayId === dayId && b.slotIdx === slotIdx);
-    
-    if (existingIndex >= 0) {
-      selectedBeds.splice(existingIndex, 1);
-    } else {
-      const sameDayIndex = selectedBeds.findIndex(b => b.dayId === dayId);
-      if (sameDayIndex >= 0) {
-        selectedBeds[sameDayIndex] = { dayId, slotIdx, dateText };
-      } else {
-        selectedBeds.push({ dayId, slotIdx, dateText });
-      }
-    }
-    updateMultiSelectUI();
-    renderApp();
+    handleMultiSelectToggle(slot, false);
   }
 }
 
@@ -267,6 +272,7 @@ function updateMultiSelectUI() {
   const activeToolbar = document.getElementById('toolbar-active');
   const countSpan = document.getElementById('multi-select-count');
   const bookBtn = document.getElementById('btn-book-multi');
+  const cancelBtnAction = document.getElementById('btn-cancel-multi-action');
 
   if (!defaultToolbar || !activeToolbar) return;
 
@@ -274,7 +280,26 @@ function updateMultiSelectUI() {
     defaultToolbar.classList.add('hidden');
     activeToolbar.classList.remove('hidden');
     countSpan.textContent = `${selectedBeds.length} bed${selectedBeds.length === 1 ? '' : 's'} selected`;
-    bookBtn.disabled = selectedBeds.length === 0;
+    
+    const hasAvailable = selectedBeds.some(b => !b.isBooked);
+    const hasBooked = selectedBeds.some(b => b.isBooked);
+
+    if (bookBtn) {
+      if (hasAvailable) {
+        bookBtn.classList.remove('hidden');
+        bookBtn.disabled = false;
+      } else {
+        bookBtn.classList.add('hidden');
+      }
+    }
+
+    if (cancelBtnAction) {
+      if (hasBooked) {
+        cancelBtnAction.classList.remove('hidden');
+      } else {
+        cancelBtnAction.classList.add('hidden');
+      }
+    }
   } else {
     defaultToolbar.classList.remove('hidden');
     activeToolbar.classList.add('hidden');
@@ -283,11 +308,15 @@ function updateMultiSelectUI() {
 
 function handleCancelClick(e) {
   const slot = e.currentTarget;
-  document.getElementById('cancel-name').textContent = slot.dataset.booker;
-  document.getElementById('cancel-date-text').textContent = slot.dataset.dateText;
-  document.getElementById('cancel-day-id').value = slot.dataset.dayId;
-  document.getElementById('cancel-slot-idx').value = slot.dataset.slotIdx;
-  cancelModal.classList.add('active');
+  if (!isMultiSelectMode) {
+    document.getElementById('cancel-name').textContent = slot.dataset.booker;
+    document.getElementById('cancel-date-text').textContent = slot.dataset.dateText;
+    document.getElementById('cancel-day-id').value = slot.dataset.dayId;
+    document.getElementById('cancel-slot-idx').value = slot.dataset.slotIdx;
+    cancelModal.classList.add('active');
+  } else {
+    handleMultiSelectToggle(slot, true);
+  }
 }
 
 function closeModal(modalElement) {
@@ -314,13 +343,41 @@ function setupEventListeners() {
   });
 
   document.getElementById('btn-book-multi').addEventListener('click', () => {
-    if (selectedBeds.length === 0) return;
-    document.getElementById('modal-title').textContent = `Book ${selectedBeds.length} Beds`;
+    const availableBeds = selectedBeds.filter(b => !b.isBooked);
+    if (availableBeds.length === 0) return;
+    document.getElementById('modal-title').textContent = `Book ${availableBeds.length} Beds`;
     document.getElementById('modal-date').textContent = "Multiple Dates Selected";
     bookerNameInput.value = '';
     bookingModal.classList.add('active');
     setTimeout(() => bookerNameInput.focus(), 100);
   });
+
+  const cancelMultiBtn = document.getElementById('btn-cancel-multi-action');
+  if (cancelMultiBtn) {
+    cancelMultiBtn.addEventListener('click', () => {
+      const bookedBeds = selectedBeds.filter(b => b.isBooked);
+      if (bookedBeds.length === 0) return;
+      
+      let successCount = 0;
+      for (const bed of bookedBeds) {
+        if (updateBedStatus(bed.dayId, bed.slotIdx, null, true)) {
+          successCount++;
+        }
+      }
+      
+      if (successCount > 0) {
+        saveData();
+        if (!isFirebaseConfigured) renderApp();
+        showToast(`Successfully cancelled ${successCount} beds!`);
+        isMultiSelectMode = false;
+        selectedBeds = [];
+        updateMultiSelectUI();
+        renderApp();
+      } else {
+        showToast(`Failed to cancel selected beds.`, true);
+      }
+    });
+  }
 
   window.addEventListener('click', (e) => {
     if (e.target === bookingModal) closeModal(bookingModal);
@@ -334,7 +391,8 @@ function setupEventListeners() {
 
     if (isMultiSelectMode) {
       let successCount = 0;
-      for (const bed of selectedBeds) {
+      const availableBeds = selectedBeds.filter(b => !b.isBooked);
+      for (const bed of availableBeds) {
         if (updateBedStatus(bed.dayId, bed.slotIdx, name, true)) {
           successCount++;
         }
