@@ -2,7 +2,13 @@
 // ⚠️ FIREBASE CONFIGURATION
 // ========================================================
 const firebaseConfig = {
-
+  apiKey: "AIzaSyAhqGJUjhD96I8MiLxb33d5XYac5dtr0Eg",
+  authDomain: "summer-beds.firebaseapp.com",
+  projectId: "summer-beds",
+  storageBucket: "summer-beds.firebasestorage.app",
+  messagingSenderId: "78282317222",
+  appId: "1:78282317222:web:02620055449215769b8367",
+  databaseURL: "https://summer-beds-default-rtdb.europe-west1.firebasedatabase.app" // En
 };
 
 // Check if Firebase is actually configured
@@ -57,6 +63,7 @@ const WEEKS_DATA = [
 ];
 
 let appData = JSON.parse(JSON.stringify(WEEKS_DATA));
+let currentWeekIndex = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
@@ -124,19 +131,59 @@ function renderApp() {
     appData = JSON.parse(JSON.stringify(WEEKS_DATA));
   }
 
-  appData.forEach(week => {
-    const weekEl = document.createElement('section');
-    weekEl.className = 'week-section';
-    weekEl.id = week.id;
+  // Ensure currentWeekIndex is within bounds
+  if (currentWeekIndex >= appData.length) {
+    currentWeekIndex = appData.length - 1;
+  }
+  if (currentWeekIndex < 0) {
+    currentWeekIndex = 0;
+  }
 
-    const weekHeader = document.createElement('div');
-    weekHeader.className = 'week-header';
-    weekHeader.innerHTML = `
+  const week = appData[currentWeekIndex];
+  if (!week) return; // Safeguard
+
+  const weekEl = document.createElement('section');
+  weekEl.className = 'week-section';
+  weekEl.id = week.id;
+
+  const weekHeader = document.createElement('div');
+  weekHeader.className = 'week-header';
+
+  const prevBtnHTML = currentWeekIndex > 0 
+    ? `<button class="nav-btn" id="prev-week-btn" aria-label="Previous Week"><i data-feather="chevron-left"></i></button>`
+    : `<div class="nav-btn-placeholder"></div>`;
+    
+  const nextBtnHTML = currentWeekIndex < appData.length - 1
+    ? `<button class="nav-btn" id="next-week-btn" aria-label="Next Week"><i data-feather="chevron-right"></i></button>`
+    : `<div class="nav-btn-placeholder"></div>`;
+
+  weekHeader.innerHTML = `
+    <div class="week-title-nav">
+      ${prevBtnHTML}
       <h2 class="week-title">Week ${week.weekNum}</h2>
-      <span class="week-dates">${week.dateRange}</span>
-    `;
+      ${nextBtnHTML}
+    </div>
+    <span class="week-dates">${week.dateRange}</span>
+  `;
 
-    const daysGrid = document.createElement('div');
+  // Add event listeners for navigation
+  const prevBtn = weekHeader.querySelector('#prev-week-btn');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentWeekIndex--;
+      renderApp();
+    });
+  }
+
+  const nextBtn = weekHeader.querySelector('#next-week-btn');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentWeekIndex++;
+      renderApp();
+    });
+  }
+
+  const daysGrid = document.createElement('div');
     daysGrid.className = 'days-grid';
 
     week.days.forEach(day => {
@@ -190,7 +237,6 @@ function renderApp() {
     weekEl.appendChild(weekHeader);
     weekEl.appendChild(daysGrid);
     container.appendChild(weekEl);
-  });
 
   if (window.feather) {
     feather.replace();
