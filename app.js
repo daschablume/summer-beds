@@ -170,6 +170,19 @@ function renderApp() {
   const daysGrid = document.createElement('div');
   daysGrid.className = 'days-grid';
 
+  const nameToColorMap = new Map();
+  let nextColorIndex = 0;
+  week.days.forEach(day => {
+    if (day.beds) {
+      day.beds.forEach(bookerName => {
+        if (bookerName && !nameToColorMap.has(bookerName)) {
+          nameToColorMap.set(bookerName, nextColorIndex % 10);
+          nextColorIndex++;
+        }
+      });
+    }
+  });
+
   week.days.forEach(day => {
     const dayCard = document.createElement('div');
     dayCard.className = 'day-card';
@@ -199,8 +212,9 @@ function renderApp() {
       const isSelected = selectedInDay.some(b => b.slotIdx === idx);
 
       if (bookerName) {
-        // Assign a distinct color to every booked bed based on its slot index
-        const colorClass = ` bed-color-${idx % 10}`;
+        // Assign color based on the person's name for consistency throughout the week
+        const colorIdx = nameToColorMap.get(bookerName);
+        const colorClass = ` bed-color-${colorIdx}`;
         bedSlot.className = isSelected ? `bed-slot bed-booked bed-selected${colorClass}` : `bed-slot bed-booked${colorClass}`;
         bedSlot.dataset.booker = bookerName;
         bedSlot.innerHTML = `
