@@ -428,13 +428,14 @@ function setupEventListeners() {
         }
       }
       if (successCount > 0) {
-        saveData();
-        if (!isFirebaseConfigured) renderApp();
-        showToast(`Successfully booked ${successCount} beds!`);
         isMultiSelectMode = false;
         selectedBeds = [];
         updateMultiSelectUI();
         closeModal(bookingModal);
+        
+        saveData();
+        if (!isFirebaseConfigured) renderApp();
+        showToast(`Successfully booked ${successCount} beds!`);
       } else {
         showToast(`Failed to book selected beds.`, true);
       }
