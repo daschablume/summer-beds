@@ -174,12 +174,13 @@ function renderApp() {
   let nextColorIndex = 0;
   week.days.forEach(day => {
     if (day.beds) {
-      day.beds.forEach(bookerName => {
-        if (bookerName && !nameToColorMap.has(bookerName)) {
+      for (let i = 0; i < 8; i++) {
+        const bookerName = day.beds[i];
+        if (bookerName && typeof bookerName === 'string' && !nameToColorMap.has(bookerName)) {
           nameToColorMap.set(bookerName, nextColorIndex % 10);
           nextColorIndex++;
         }
-      });
+      }
     }
   });
 
@@ -215,7 +216,7 @@ function renderApp() {
         // Assign color based on the person's name for consistency throughout the week
         const colorIdx = nameToColorMap.get(bookerName);
         const colorClass = ` bed-color-${colorIdx}`;
-        bedSlot.className = isSelected ? `bed-slot bed-booked bed-selected${colorClass}` : `bed-slot bed-booked${colorClass}`;
+        bedSlot.className = isSelected ? `bed-slot bed-booked bed-selected bed-selected-cancel` : `bed-slot bed-booked${colorClass}`;
         bedSlot.dataset.booker = bookerName;
         bedSlot.innerHTML = `
           <div class="bed-content">
@@ -225,9 +226,7 @@ function renderApp() {
         `;
         bedSlot.addEventListener('click', handleCancelClick);
       } else {
-        // For available beds, only show color if actively selected
-        const colorClass = isSelected ? ` bed-color-${idx % 10}` : '';
-        bedSlot.className = isSelected ? `bed-slot bed-selected${colorClass}` : 'bed-slot bed-available';
+        bedSlot.className = isSelected ? `bed-slot bed-available bed-selected bed-selected-book` : 'bed-slot bed-available';
         bedSlot.innerHTML = isSelected ? 'Selected' : 'Available';
         bedSlot.addEventListener('click', handleBookClick);
       }
