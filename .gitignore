@@ -1,3 +1,4 @@
 .firebaserc
 config.js
 host_locally
+.firebase/
