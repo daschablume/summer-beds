@@ -187,6 +187,8 @@ function renderApp() {
 
     if (!day.beds) day.beds = new Array(8).fill(null);
 
+    const selectedInDay = isMultiSelectMode ? selectedBeds.filter(b => b.dayId === day.id) : [];
+
     for (let idx = 0; idx < 8; idx++) {
       const bookerName = day.beds[idx] || null;
       const bedSlot = document.createElement('div');
@@ -194,9 +196,12 @@ function renderApp() {
       bedSlot.dataset.slotIdx = idx;
       bedSlot.dataset.dateText = `${day.name}, ${day.date}`;
 
+      const isSelected = selectedInDay.some(b => b.slotIdx === idx);
+
       if (bookerName) {
-        const isSelected = isMultiSelectMode && selectedBeds.some(b => b.dayId === day.id && b.slotIdx === idx);
-        bedSlot.className = isSelected ? 'bed-slot bed-booked bed-selected' : 'bed-slot bed-booked';
+        // Assign a distinct color to every booked bed based on its slot index
+        const colorClass = ` bed-color-${idx % 10}`;
+        bedSlot.className = isSelected ? `bed-slot bed-booked bed-selected${colorClass}` : `bed-slot bed-booked${colorClass}`;
         bedSlot.dataset.booker = bookerName;
         bedSlot.innerHTML = `
           <div class="bed-content">
@@ -206,8 +211,9 @@ function renderApp() {
         `;
         bedSlot.addEventListener('click', handleCancelClick);
       } else {
-        const isSelected = isMultiSelectMode && selectedBeds.some(b => b.dayId === day.id && b.slotIdx === idx);
-        bedSlot.className = isSelected ? 'bed-slot bed-selected' : 'bed-slot bed-available';
+        // For available beds, only show color if actively selected
+        const colorClass = isSelected ? ` bed-color-${idx % 10}` : '';
+        bedSlot.className = isSelected ? `bed-slot bed-selected${colorClass}` : 'bed-slot bed-available';
         bedSlot.innerHTML = isSelected ? 'Selected' : 'Available';
         bedSlot.addEventListener('click', handleBookClick);
       }
