@@ -267,7 +267,7 @@ function handleMultiSelectToggle(slot, isBooked) {
   }
 
   const existingIndex = selectedBeds.findIndex(b => b.dayId === dayId && b.slotIdx === slotIdx);
-  
+
   if (existingIndex >= 0) {
     selectedBeds.splice(existingIndex, 1);
   } else {
@@ -309,8 +309,8 @@ function updateMultiSelectUI() {
   if (isMultiSelectMode) {
     defaultToolbar.classList.add('hidden');
     activeToolbar.classList.remove('hidden');
-    countSpan.textContent = `${selectedBeds.length} bed${selectedBeds.length === 1 ? '' : 's'} selected`;
-    
+    countSpan.textContent = `${selectedBeds.length} night${selectedBeds.length === 1 ? '' : 's'} selected`;
+
     const hasAvailable = selectedBeds.some(b => !b.isBooked);
     const hasBooked = selectedBeds.some(b => b.isBooked);
 
@@ -364,7 +364,7 @@ function setupEventListeners() {
     updateMultiSelectUI();
     renderApp();
   });
-  
+
   document.getElementById('btn-cancel-multi').addEventListener('click', () => {
     isMultiSelectMode = false;
     selectedBeds = [];
@@ -387,14 +387,14 @@ function setupEventListeners() {
     cancelMultiBtn.addEventListener('click', () => {
       const bookedBeds = selectedBeds.filter(b => b.isBooked);
       if (bookedBeds.length === 0) return;
-      
+
       let successCount = 0;
       for (const bed of bookedBeds) {
         if (updateBedStatus(bed.dayId, bed.slotIdx, null, true)) {
           successCount++;
         }
       }
-      
+
       if (successCount > 0) {
         saveData();
         if (!isFirebaseConfigured) renderApp();
@@ -432,7 +432,7 @@ function setupEventListeners() {
         selectedBeds = [];
         updateMultiSelectUI();
         closeModal(bookingModal);
-        
+
         saveData();
         if (!isFirebaseConfigured) renderApp();
         showToast(`Successfully booked ${successCount} beds!`);
