@@ -59,7 +59,7 @@ const WEEKS_DATA = [
 ];
 
 let appData = JSON.parse(JSON.stringify(WEEKS_DATA));
-let currentWeekIndex = 0;
+let currentWeekIndex = 1;
 let isMultiSelectMode = false;
 let selectedBeds = [];
 
