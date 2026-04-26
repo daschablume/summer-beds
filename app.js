@@ -14,6 +14,13 @@ if (isFirebaseConfigured) {
 // Initial Data Structure (Used if database is empty)
 const WEEKS_DATA = [
   {
+    id: 'week-25', weekNum: 25, dateRange: 'June 20 - June 21, 2026',
+    days: [
+      { id: 'd25-6', name: 'Saturday', date: 'June 20', beds: new Array(8).fill(null) },
+      { id: 'd25-7', name: 'Sunday', date: 'June 21', beds: new Array(8).fill(null) },
+    ]
+  },
+  {
     id: 'week-26', weekNum: 26, dateRange: 'June 22 - June 28, 2026',
     days: [
       { id: 'd26-1', name: 'Monday', date: 'June 22', beds: new Array(8).fill(null) },
@@ -71,12 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================================================
 
 function loadData() {
+  const migrateData = () => {
+    if (Array.isArray(appData) && appData.length > 0 && appData[0].id !== 'week-25') {
+      appData.unshift(JSON.parse(JSON.stringify(WEEKS_DATA[0])));
+      saveData();
+    }
+  };
+
   if (isFirebaseConfigured) {
     const bedsRef = database.ref('summer_beds_data');
     bedsRef.on('value', (snapshot) => {
       const data = snapshot.val();
       if (data) {
         appData = data;
+        migrateData();
       } else {
         appData = JSON.parse(JSON.stringify(WEEKS_DATA));
         bedsRef.set(appData).catch(err => console.warn("Could not seed data:", err));
@@ -93,6 +108,7 @@ function loadData() {
     if (stored) {
       try {
         appData = JSON.parse(stored);
+        migrateData();
       } catch (e) {
         appData = JSON.parse(JSON.stringify(WEEKS_DATA));
       }
