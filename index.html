@@ -32,10 +32,32 @@
         <!-- Multi-Select Toolbar -->
         <div id="multi-select-toolbar" class="multi-select-toolbar">
             <div class="toolbar-content" id="toolbar-default">
-                <button id="btn-enable-multi" class="btn-action">
+                <button id="btn-enable-multi" class="btn-action" title="Select and book/cancel multiple nights">
                     <i data-feather="check-square"></i>
                     <span>Select Multiple Nights</span>
                 </button>
+                <div class="toolbar-divider"></div>
+                <button id="btn-info-page" class="btn-action" title="Information on how to get to Brännö">
+                    <i data-feather="info"></i>
+                    <span>Directions</span>
+                </button>
+                <div class="dropdown-container" id="dropdown-arr-dep">
+                    <button id="btn-arr-dep-page" class="btn-action" title="Arrival and departure plans">
+                        <i data-feather="navigation"></i>
+                        <span>Arrivals Details</span>
+                        <i data-feather="chevron-down" class="dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-menu hidden" id="menu-arr-dep">
+                        <button id="btn-add-plans" class="dropdown-item">
+                            <i data-feather="plus-circle"></i>
+                            <span>Add your plans</span>
+                        </button>
+                        <button id="btn-see-plans" class="dropdown-item">
+                            <i data-feather="users"></i>
+                            <span>See others' plans</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="toolbar-content hidden" id="toolbar-active">
                 <div class="selection-info">
@@ -53,6 +75,119 @@
         <!-- Main Content -->
         <main class="calendar-container" id="calendar-container">
             <!-- Weeks will be rendered here via JS -->
+        </main>
+
+        <!-- How to Get to Info Page -->
+        <main class="page-container hidden" id="page-info">
+            <div class="page-header">
+                <button class="btn-back" id="btn-back-from-info">
+                    <i data-feather="arrow-left"></i>
+                    <span>Back to Calendar</span>
+                </button>
+                <h2>How to Get to Brännö</h2>
+                <p class="page-subtitle">Travel guide & ferry instructions to Brännö</p>
+            </div>
+            <div class="page-card">
+                <h3>Some Navigation Tips for Gotheburg and Brännö!</h3>
+                <p>
+                    <mark>Local traffic</mark> is run by Västtrafik, and you can search for journeys
+                    <a href="https://www.vasttrafik.se/reseplanering/reseplaneraren/" target="_blank"
+                        rel="noopener noreferrer"> their website.
+                    </a>
+                </p>
+                <p>The easiest way to <mark>buy a ticket</mark> is to download the app Västtrafik To Go (in which you
+                    could also
+                    search for journeys). A ticket there can be bought with Swish or card. Card might need some
+                    verification, not sure exactly what is compatible and not. You might want to try this beforehand.
+                    The other option is to buy a physical card at some store (Pressbyrån, 7-Eleven or similar), and
+                    charge it with some amount, then blip it at the start of journeys.</p>
+                <p><mark>To get to Brännö</mark>, take a tram or bus to <strong>Saltholmen</strong>, then a short ferry
+                    to the island. The ferry is also run by Västtrafik, and part of the inner zone, so the same cost as
+                    travelling in the city.
+                    <br />
+                </p>
+                <h3>
+                    Which dock to arrive to?
+                </h3>
+                <ul>
+                    <li><strong>Brännö Rödsten</strong>. A classic. It runs approximately once an hour from 5:00-1:00,
+                        or something like that,
+                        and takes 17 minutes.</li>
+                    <li><strong>Brännö Husvik</strong> is much closer to the cabin. But the ferry only
+                        goes there about 6 times a day, and takes 40-50 minutes. If you have luggage you don't want to
+                        walk across the island with (30 min walk), and don't mind a nice boat ride through the islands
+                        of the Swedish west coast, this could be a better option for you!</li>
+                </ul>
+                <p>See the address here.</p>
+                <p>
+                    There is <mark>only one grocery shop on Brännö</mark>, in the center of the island. But some
+                    restaurants exist, all pretty small and locally managed.</p>
+                </p>
+                <iframe width="425" height="350" src="" style="border: 1px solid black">
+                </iframe><br />
+                <small>
+                    <a href="" target="_blank">View Larger
+                        Map</a>
+                </small>
+            </div>
+        </main>
+
+        <!-- Add Your Plans Page -->
+        <main class="page-container hidden" id="page-add-plans">
+            <div class="page-header">
+                <button class="btn-back" id="btn-back-from-add-plans">
+                    <i data-feather="arrow-left"></i>
+                    <span>Back to Calendar</span>
+                </button>
+                <h2>Add Your Plans</h2>
+                <p class="page-subtitle">Let everyone know when you are arriving and departing</p>
+            </div>
+            <div class="page-card">
+                <h3>Submit Arrival & Departure Details</h3>
+                <form id="add-plans-form" class="plans-form">
+                    <div class="input-group">
+                        <label for="plan-name">Your Name</label>
+                        <input type="text" id="plan-name" placeholder="E.g., Elsa Johansson" required
+                            autocomplete="off">
+                    </div>
+                    <div class="form-row">
+                        <div class="input-group flex-1">
+                            <label for="plan-arr-date">Arrival Date & Time</label>
+                            <input type="text" id="plan-arr-date" placeholder="E.g., Friday 18:00 (Ferry 281)" required
+                                autocomplete="off">
+                        </div>
+                        <div class="input-group flex-1">
+                            <label for="plan-dep-date">Departure Date & Time</label>
+                            <input type="text" id="plan-dep-date" placeholder="E.g., Sunday 15:00" required
+                                autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="plan-notes">Additional Notes</label>
+                        <input type="text" id="plan-notes" placeholder="E.g., Bringing a dog / Need help with luggage"
+                            autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary">Save Plans</button>
+                </form>
+            </div>
+        </main>
+
+        <!-- See Others' Plans Page -->
+        <main class="page-container hidden" id="page-see-plans">
+            <div class="page-header">
+                <button class="btn-back" id="btn-back-from-see-plans">
+                    <i data-feather="arrow-left"></i>
+                    <span>Back to Calendar</span>
+                </button>
+                <h2>See Others' Plans</h2>
+                <p class="page-subtitle">Overview of incoming and outgoing guests</p>
+            </div>
+            <div class="page-card empty-state">
+                <i data-feather="users" class="empty-icon"></i>
+                <h3>No plans submitted yet</h3>
+                <p>When you or others add arrival and departure times, they will appear here in a coordinated schedule.
+                </p>
+            </div>
         </main>
 
         <!-- Booking Modal -->
