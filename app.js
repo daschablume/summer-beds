@@ -369,7 +369,111 @@ function closeModal(modalElement) {
   modalElement.classList.remove('active');
 }
 
+function switchView(viewName) {
+  const calendarContainer = document.getElementById('calendar-container');
+  const multiSelectToolbar = document.getElementById('multi-select-toolbar');
+  const pageInfo = document.getElementById('page-info');
+  const pageAddPlans = document.getElementById('page-add-plans');
+  const pageSeePlans = document.getElementById('page-see-plans');
+  const dropdownArrDep = document.getElementById('dropdown-arr-dep');
+  const menuArrDep = document.getElementById('menu-arr-dep');
+
+  if (calendarContainer) calendarContainer.classList.add('hidden');
+  if (multiSelectToolbar) multiSelectToolbar.classList.add('hidden');
+  if (pageInfo) pageInfo.classList.add('hidden');
+  if (pageAddPlans) pageAddPlans.classList.add('hidden');
+  if (pageSeePlans) pageSeePlans.classList.add('hidden');
+
+  if (dropdownArrDep) dropdownArrDep.classList.remove('open');
+  if (menuArrDep) menuArrDep.classList.add('hidden');
+
+  if (viewName === 'calendar') {
+    if (calendarContainer) calendarContainer.classList.remove('hidden');
+    if (multiSelectToolbar) multiSelectToolbar.classList.remove('hidden');
+    updateMultiSelectUI();
+  } else if (viewName === 'info') {
+    if (pageInfo) pageInfo.classList.remove('hidden');
+  } else if (viewName === 'add-plans') {
+    if (pageAddPlans) pageAddPlans.classList.remove('hidden');
+  } else if (viewName === 'see-plans') {
+    if (pageSeePlans) pageSeePlans.classList.remove('hidden');
+  }
+
+  if (window.feather) feather.replace();
+}
+
 function setupEventListeners() {
+  const logoHome = document.querySelector('.logo');
+  if (logoHome) {
+    logoHome.style.cursor = 'pointer';
+    logoHome.addEventListener('click', () => switchView('calendar'));
+  }
+
+  const btnInfoPage = document.getElementById('btn-info-page');
+  if (btnInfoPage) {
+    btnInfoPage.addEventListener('click', () => switchView('info'));
+  }
+
+  const btnArrDepPage = document.getElementById('btn-arr-dep-page');
+  const dropdownArrDep = document.getElementById('dropdown-arr-dep');
+  const menuArrDep = document.getElementById('menu-arr-dep');
+
+  if (btnArrDepPage && dropdownArrDep && menuArrDep) {
+    btnArrDepPage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = dropdownArrDep.classList.contains('open');
+      if (isOpen) {
+        dropdownArrDep.classList.remove('open');
+        menuArrDep.classList.add('hidden');
+      } else {
+        dropdownArrDep.classList.add('open');
+        menuArrDep.classList.remove('hidden');
+      }
+    });
+  }
+
+  window.addEventListener('click', (e) => {
+    if (dropdownArrDep && !dropdownArrDep.contains(e.target)) {
+      dropdownArrDep.classList.remove('open');
+      if (menuArrDep) menuArrDep.classList.add('hidden');
+    }
+  });
+
+  const btnAddPlans = document.getElementById('btn-add-plans');
+  if (btnAddPlans) {
+    btnAddPlans.addEventListener('click', () => switchView('add-plans'));
+  }
+
+  const btnSeePlans = document.getElementById('btn-see-plans');
+  if (btnSeePlans) {
+    btnSeePlans.addEventListener('click', () => switchView('see-plans'));
+  }
+
+  const btnBackFromInfo = document.getElementById('btn-back-from-info');
+  if (btnBackFromInfo) {
+    btnBackFromInfo.addEventListener('click', () => switchView('calendar'));
+  }
+
+  const btnBackFromAdd = document.getElementById('btn-back-from-add-plans');
+  if (btnBackFromAdd) {
+    btnBackFromAdd.addEventListener('click', () => switchView('calendar'));
+  }
+
+  const btnBackFromSee = document.getElementById('btn-back-from-see-plans');
+  if (btnBackFromSee) {
+    btnBackFromSee.addEventListener('click', () => switchView('calendar'));
+  }
+
+  const addPlansForm = document.getElementById('add-plans-form');
+  if (addPlansForm) {
+    addPlansForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showToast("Plans saved successfully!");
+      switchView('calendar');
+      addPlansForm.reset();
+    });
+  }
+
   document.getElementById('close-modal').addEventListener('click', () => closeModal(bookingModal));
   document.getElementById('close-cancel-modal').addEventListener('click', () => closeModal(cancelModal));
   document.getElementById('btn-keep-booking').addEventListener('click', () => closeModal(cancelModal));
