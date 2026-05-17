@@ -2,3 +2,4 @@
 config.js
 host_locally
 .firebase/
+deploy.md
