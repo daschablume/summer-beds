@@ -875,3 +875,94 @@ button {
     gap: 1.5rem;
   }
 }
+
+/* Plans List Styles */
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.plan-card {
+  gap: 1rem;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #E5E7EB;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.plan-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin: 0;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.btn-delete-plan {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.btn-delete-plan:hover {
+  background: #FEE2E2;
+  color: var(--color-danger);
+}
+
+.plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plan-detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.plan-detail-row i {
+  margin-top: 0.125rem;
+}
+
+.arr-icon {
+  color: var(--color-success);
+}
+
+.dep-icon {
+  color: var(--color-primary);
+}
+
+.notes-icon {
+  color: var(--color-ocean);
+}
+
+.plan-detail-row strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.1rem;
+}
+
+.plan-detail-row span {
+  font-size: 1rem;
+  color: var(--color-text-main);
+}

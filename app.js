@@ -62,6 +62,7 @@ let appData = JSON.parse(JSON.stringify(WEEKS_DATA));
 let currentWeekIndex = 1;
 let isMultiSelectMode = false;
 let selectedBeds = [];
+let plansData = [];
 
 const bookingModal = document.getElementById('booking-modal');
 const cancelModal = document.getElementById('cancel-modal');
@@ -103,6 +104,13 @@ function loadData() {
       renderApp();
       showToast("Could not connect to database. Check security rules.", true);
     });
+
+    const plansRef = database.ref('summer_beds_plans');
+    plansRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      plansData = data ? Object.values(data) : [];
+      renderPlans();
+    });
   } else {
     const stored = localStorage.getItem('summerBedsData');
     if (stored) {
@@ -115,7 +123,20 @@ function loadData() {
     } else {
       appData = JSON.parse(JSON.stringify(WEEKS_DATA));
     }
+
+    const storedPlans = localStorage.getItem('summerBedsPlans');
+    if (storedPlans) {
+      try {
+        plansData = JSON.parse(storedPlans);
+      } catch (e) {
+        plansData = [];
+      }
+    } else {
+      plansData = [];
+    }
+
     renderApp();
+    renderPlans();
   }
 }
 
@@ -125,6 +146,15 @@ function saveData() {
       .catch((error) => console.error("Firebase update failed:", error));
   } else {
     localStorage.setItem('summerBedsData', JSON.stringify(appData));
+  }
+}
+
+function savePlans() {
+  if (isFirebaseConfigured) {
+    database.ref('summer_beds_plans').set(plansData)
+      .catch((error) => console.error("Firebase update failed:", error));
+  } else {
+    localStorage.setItem('summerBedsPlans', JSON.stringify(plansData));
   }
 }
 
@@ -259,6 +289,72 @@ function renderApp() {
   weekEl.appendChild(daysGrid);
   container.appendChild(weekEl);
 
+  if (window.feather) feather.replace();
+}
+
+function renderPlans() {
+  const plansEmptyState = document.getElementById('plans-empty-state');
+  const plansListContainer = document.getElementById('plans-list-container');
+  if (!plansListContainer) return;
+
+  if (!plansData || plansData.length === 0) {
+    if (plansEmptyState) plansEmptyState.classList.remove('hidden');
+    plansListContainer.innerHTML = '';
+  } else {
+    if (plansEmptyState) plansEmptyState.classList.add('hidden');
+    
+    // Reverse array to show newest first
+    const sortedPlans = [...plansData].reverse();
+    
+    let html = '';
+    sortedPlans.forEach(plan => {
+      html += `
+        <div class="page-card plan-card">
+            <div class="plan-header">
+                <h3 class="plan-name"><i data-feather="user"></i> ${plan.name}</h3>
+                <button class="btn-delete-plan" data-id="${plan.id}" title="Delete Plan"><i data-feather="trash-2"></i></button>
+            </div>
+            <div class="plan-details">
+                <div class="plan-detail-row">
+                    <i data-feather="arrow-down-right" class="arr-icon"></i>
+                    <div>
+                        <strong>Arrival:</strong>
+                        <span>${plan.arrDate}</span>
+                    </div>
+                </div>
+                <div class="plan-detail-row">
+                    <i data-feather="arrow-up-right" class="dep-icon"></i>
+                    <div>
+                        <strong>Departure:</strong>
+                        <span>${plan.depDate}</span>
+                    </div>
+                </div>
+                ${plan.notes ? `
+                <div class="plan-detail-row notes-row">
+                    <i data-feather="message-square" class="notes-icon"></i>
+                    <div>
+                        <strong>Notes:</strong>
+                        <span>${plan.notes}</span>
+                    </div>
+                </div>` : ''}
+            </div>
+        </div>
+      `;
+    });
+    
+    plansListContainer.innerHTML = html;
+    
+    const deleteBtns = plansListContainer.querySelectorAll('.btn-delete-plan');
+    deleteBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        plansData = plansData.filter(p => p.id !== id);
+        savePlans();
+        if (!isFirebaseConfigured) renderPlans();
+        showToast("Plan deleted!");
+      });
+    });
+  }
   if (window.feather) feather.replace();
 }
 
@@ -468,8 +564,29 @@ function setupEventListeners() {
   if (addPlansForm) {
     addPlansForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      
+      const name = document.getElementById('plan-name').value.trim();
+      const arrDate = document.getElementById('plan-arr-date').value.trim();
+      const depDate = document.getElementById('plan-dep-date').value.trim();
+      const notes = document.getElementById('plan-notes').value.trim();
+
+      if (!name || !arrDate || !depDate) return;
+
+      const newPlan = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        name,
+        arrDate,
+        depDate,
+        notes,
+        timestamp: Date.now()
+      };
+
+      plansData.push(newPlan);
+      savePlans();
+      if (!isFirebaseConfigured) renderPlans();
+
       showToast("Plans saved successfully!");
-      switchView('calendar');
+      switchView('see-plans');
       addPlansForm.reset();
     });
   }
