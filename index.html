@@ -118,11 +118,7 @@
                         walk across the island with (30 min walk), and don't mind a nice boat ride through the islands
                         of the Swedish west coast, this could be a better option for you!</li>
                 </ul>
-                <p>
-                    There is <mark>only one grocery shop on Brännö</mark>, in the center of the island. But some
-                    restaurants exist, all pretty small and locally managed.</p>
-                </p>
-                <p>See the <mark>address</mark> <a id="address-link" href="#" target="_blank">here</a></p>
+                <p>See the <mark>address </mark><a id="address-link" href="#" target="_blank">here</a></p>
                 <div id="map-container"></div>
                 <small><a id="map-link" href="#" target="_blank">View Larger Map</a></small>
 
@@ -137,6 +133,11 @@
                     document.getElementById("map-link").href = `https://www.openstreetmap.org/?#map=${mapConfig.mapLink}`;
                     document.getElementById("address-link").href = mapConfig.addressUrl;
                 </script>
+                <h3>Miscellanous</h3>
+                <p>
+                    There is <mark>only one grocery shop on Brännö</mark>, in the center of the island. But some
+                    restaurants exist, all pretty small and locally managed.</p>
+                </p>
             </div>
         </main>
 
@@ -148,7 +149,7 @@
                     <span>Back to Calendar</span>
                 </button>
                 <h2>Add Your Plans</h2>
-                <p class="page-subtitle">Let everyone know when you are arriving and departing</p>
+                <p class="page-subtitle">Let's keep all the data in one place</p>
             </div>
             <div class="page-card">
                 <h3>Submit Arrival & Departure Details</h3>
@@ -161,18 +162,19 @@
                     <div class="form-row">
                         <div class="input-group flex-1">
                             <label for="plan-arr-date">Arrival Date & Time</label>
-                            <input type="text" id="plan-arr-date" placeholder="E.g., Friday 18:00 (Ferry 281)" required
-                                autocomplete="off">
+                            <input type="text" id="plan-arr-date" placeholder="E.g., 30/06/26, 18:00, plane, Gothenburg"
+                                required autocomplete="off">
                         </div>
                         <div class="input-group flex-1">
                             <label for="plan-dep-date">Departure Date & Time</label>
-                            <input type="text" id="plan-dep-date" placeholder="E.g., Sunday 15:00" required
+                            <input type="text" id="plan-dep-date" placeholder="E.g., 07/07/26, 15:00" required
                                 autocomplete="off">
                         </div>
                     </div>
                     <div class="input-group">
                         <label for="plan-notes">Additional Notes</label>
-                        <input type="text" id="plan-notes" placeholder="E.g., Bringing a dog / Need help with luggage"
+                        <input type="text" id="plan-notes"
+                            placeholder="E.g., Need help with a luggage / Very late arrival to the city, etc."
                             autocomplete="off">
                     </div>
                     <button type="submit" class="btn-primary">Save Plans</button>
