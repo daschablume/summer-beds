@@ -118,17 +118,25 @@
                         walk across the island with (30 min walk), and don't mind a nice boat ride through the islands
                         of the Swedish west coast, this could be a better option for you!</li>
                 </ul>
-                <p>See the address here.</p>
                 <p>
                     There is <mark>only one grocery shop on Brännö</mark>, in the center of the island. But some
                     restaurants exist, all pretty small and locally managed.</p>
                 </p>
-                <iframe width="425" height="350" src="" style="border: 1px solid black">
+                <p>See the <mark>address</mark> <a id="address-link" href="#" target="_blank">here</a></p>
+                <div id="map-container"></div>
+                <small><a id="map-link" href="#" target="_blank">View Larger Map</a></small>
+
+                <script type="module">
+                    import { mapConfig } from './config.js';
+                    document.getElementById("map-container").innerHTML = `
+                <iframe width="425" height="350"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=${mapConfig.bbox}&layer=mapnik"
+                style="border: 1px solid black">
                 </iframe><br />
-                <small>
-                    <a href="" target="_blank">View Larger
-                        Map</a>
-                </small>
+            `;
+                    document.getElementById("map-link").href = `https://www.openstreetmap.org/?#map=${mapConfig.mapLink}`;
+                    document.getElementById("address-link").href = mapConfig.addressUrl;
+                </script>
             </div>
         </main>
 
