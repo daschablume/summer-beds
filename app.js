@@ -63,6 +63,7 @@ let currentWeekIndex = 1;
 let isMultiSelectMode = false;
 let selectedBeds = [];
 let plansData = [];
+let editingPlanId = null;
 
 const bookingModal = document.getElementById('booking-modal');
 const cancelModal = document.getElementById('cancel-modal');
@@ -312,7 +313,10 @@ function renderPlans() {
         <div class="page-card plan-card">
             <div class="plan-header">
                 <h3 class="plan-name"><i data-feather="user"></i> ${plan.name}</h3>
-                <button class="btn-delete-plan" data-id="${plan.id}" title="Delete Plan"><i data-feather="trash-2"></i></button>
+                <div class="plan-actions">
+                    <button class="btn-edit-plan" data-id="${plan.id}" title="Edit Plan"><i data-feather="edit-2"></i></button>
+                    <button class="btn-delete-plan" data-id="${plan.id}" title="Delete Plan"><i data-feather="trash-2"></i></button>
+                </div>
             </div>
             <div class="plan-details">
                 <div class="plan-detail-row">
@@ -344,6 +348,26 @@ function renderPlans() {
     
     plansListContainer.innerHTML = html;
     
+    const editBtns = plansListContainer.querySelectorAll('.btn-edit-plan');
+    editBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        const plan = plansData.find(p => p.id === id);
+        if (plan) {
+          document.getElementById('plan-name').value = plan.name;
+          document.getElementById('plan-arr-date').value = plan.arrDate;
+          document.getElementById('plan-dep-date').value = plan.depDate;
+          document.getElementById('plan-notes').value = plan.notes || '';
+          editingPlanId = id;
+          
+          const formTitle = document.querySelector('#page-add-plans h3');
+          if (formTitle) formTitle.textContent = 'Edit Arrival & Departure Details';
+          
+          switchView('add-plans');
+        }
+      });
+    });
+
     const deleteBtns = plansListContainer.querySelectorAll('.btn-delete-plan');
     deleteBtns.forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -537,7 +561,14 @@ function setupEventListeners() {
 
   const btnAddPlans = document.getElementById('btn-add-plans');
   if (btnAddPlans) {
-    btnAddPlans.addEventListener('click', () => switchView('add-plans'));
+    btnAddPlans.addEventListener('click', () => {
+      editingPlanId = null;
+      const addPlansForm = document.getElementById('add-plans-form');
+      if (addPlansForm) addPlansForm.reset();
+      const formTitle = document.querySelector('#page-add-plans h3');
+      if (formTitle) formTitle.textContent = 'Submit Arrival & Departure Details';
+      switchView('add-plans');
+    });
   }
 
   const btnSeePlans = document.getElementById('btn-see-plans');
@@ -572,20 +603,35 @@ function setupEventListeners() {
 
       if (!name || !arrDate || !depDate) return;
 
-      const newPlan = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-        name,
-        arrDate,
-        depDate,
-        notes,
-        timestamp: Date.now()
-      };
+      if (editingPlanId) {
+        const index = plansData.findIndex(p => p.id === editingPlanId);
+        if (index !== -1) {
+          plansData[index] = {
+            ...plansData[index],
+            name,
+            arrDate,
+            depDate,
+            notes
+          };
+        }
+        editingPlanId = null;
+        showToast("Plans updated successfully!");
+      } else {
+        const newPlan = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+          name,
+          arrDate,
+          depDate,
+          notes,
+          timestamp: Date.now()
+        };
+        plansData.push(newPlan);
+        showToast("Plans saved successfully!");
+      }
 
-      plansData.push(newPlan);
       savePlans();
       if (!isFirebaseConfigured) renderPlans();
 
-      showToast("Plans saved successfully!");
       switchView('see-plans');
       addPlansForm.reset();
     });

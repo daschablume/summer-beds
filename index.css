@@ -907,6 +907,12 @@ button {
   padding: 0 !important;
 }
 
+.plan-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-edit-plan,
 .btn-delete-plan {
   background: transparent;
   border: none;
@@ -918,6 +924,11 @@ button {
   align-items: center;
   justify-content: center;
   transition: var(--transition-fast);
+}
+
+.btn-edit-plan:hover {
+  background: #E0F2FE;
+  color: var(--color-ocean);
 }
 
 .btn-delete-plan:hover {
